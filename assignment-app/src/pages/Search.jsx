@@ -1,9 +1,9 @@
 import React from "react";
 
-export default function NewPage() {
+export default function Search() {
     return (
         <div>
-            <h1>This is a new page</h1>
+            <h1>Search Page</h1>
             <p>Content goes here</p>
         </div>
     );
