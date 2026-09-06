@@ -33,7 +33,8 @@ import { useSearchParams } from "react-router-dom";
 // searchquery would be something like ?keyword=searchterm&filterType=option
 
 export default function Search() {
-  const [searchResults, getSearchResults] = useState("");
+  const [searchResults, getSearchResults] = useState("No Records to Display");
+  const [searchParams, setSearchParams] = useSearchParams({})
 
   return (
     <>
@@ -48,9 +49,9 @@ export default function Search() {
               </div>
               <div className="mb-4">
                 <select name="datapoint" id="datapoint" className="w-25">
-                  <option value="">Gender</option>
-                  <option value="">Operating System</option>
                   <option value="">Model</option>
+                  <option value="">Operating System</option>
+                  <option value="">Gender</option>
                   <option value="">Behavior Class</option>
                 </select>
               </div>
@@ -65,14 +66,96 @@ export default function Search() {
               <button type="submit" className="btn btn-light w-50">
                 Search
               </button>
+              <p>No records to display</p>
             </form>
           </div>
         </div>
         <div className="row mt-4">
-          <div className="col-3 border">1</div>
-          <div className="col-3 border">2</div>
-          <div className="col-3 border">3</div>
-          <div className="col-3 border">4</div>
+          <div className="col-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">App Usage Time (min/day)</h5>
+                <p class="card-text">
+                  Some quick example text to build on the card title and make up
+                  the bulk of the card’s content.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="col-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Screen On Time (hours/day)</h5>
+                <p class="card-text">
+                  Some quick example text to build on the card title and make up
+                  the bulk of the card’s content.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="col-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Number of Apps Installed</h5>
+                <p class="card-text">
+                  Some quick example text to build on the card title and make up
+                  the bulk of the card’s content.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="col-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Age</h5>
+                <p class="card-text">
+                  Some quick example text to build on the card title and make up
+                  the bulk of the card’s content.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="row mt-2">
+          <div className="col">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">User ID</th>
+                  <th scope="col">Device Model</th>
+                  <th scope="col">Operating System</th>
+                  <th scope="col">App Usage Time (min/day)</th>
+                  <th scope="col">Screen On Time (hours/day)</th>
+                  <th scope="col">Battery Drain (mAH/day)</th>
+                  <th scope="col">Number of Apps Installed</th>
+                  <th scope="col">Data Usage (MB/day)</th>
+                  <th scope="col">Age</th>
+                  <th scope="col">Gender</th>
+                  <th scope="col">User Behavior Class</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">1</th>
+                  <td>Mark</td>
+                  <td>Otto</td>
+                  <td>@mdo</td>
+                </tr>
+                <tr>
+                  <th scope="row">2</th>
+                  <td>Jacob</td>
+                  <td>Thornton</td>
+                  <td>@fat</td>
+                </tr>
+                <tr>
+                  <th scope="row">3</th>
+                  <td>John</td>
+                  <td>Doe</td>
+                  <td>@social</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </>
