@@ -1,7 +1,8 @@
 import { React, useState } from "react";
 
 {
-  /* If you are on the Search page and have executed a search that returns results, those should not disappear if you navigate to the "Home" page and then back to the "Search" page. It is fine if the dropdown option and text search field are reset, but the results should NOT be reset from jumping between routes in the app.*/}
+  /* If you are on the Search page and have executed a search that returns results, those should not disappear if you navigate to the "Home" page and then back to the "Search" page. It is fine if the dropdown option and text search field are reset, but the results should NOT be reset from jumping between routes in the app.*/
+}
 
 // const data = await fetch(`/api/data/search`)
 // returns array of objects
@@ -28,16 +29,40 @@ import { React, useState } from "react";
 export default function Search(props) {
   const [filterState, setfilterState] = useState("");
   const [keywordState, setKeywordState] = useState("");
-  // const [searchResultState, setSearchResultState] = useState([]); - lifted to App.jsx for persistence
+  const [loadingState, setLoadingState] = useState(false);
+  const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
+  
+  const numResults = props.searchResultState.length;
 
   async function performSearch(event) {
     event.preventDefault();
+    setLoadingState(true);
+    setIsFirstPageLoad(false);
     const response = await fetch(
       `/api/data/search/?filterType=${filterState}&keyword=${keywordState}`,
     );
     const searchResult = await response.json(); // array of objects, need to array.map() to display them
     props.setSearchResultState(searchResult);
-    // console.log(searchResultState);
+    setLoadingState(false);
+  }
+
+  function btnHelperText() {
+    let text = "";
+    
+    if (loadingState) {
+      text = "Loading...";
+    }
+    else if (loadingState === false && isFirstPageLoad === true){
+      text = "";
+    } 
+    else if (loadingState === false && numResults < 1) {
+      text = "No results found"
+    }
+    else if (loadingState === false && numResults > 0){
+      text = `Displaying ${numResults} records`;
+    }
+
+    return (<p>{text}</p>)
   }
 
   return (
@@ -63,7 +88,9 @@ export default function Search(props) {
                   className="w-25"
                   onChange={(event) => setfilterState(event.target.value)}
                 >
-                  <option value="" disabled selected hidden>Select Filter...</option>
+                  <option value="" disabled selected hidden>
+                    Select Filter...
+                  </option>
                   <option value="model">Model</option>
                   <option value="operatingSystem">Operating System</option>
                   <option value="gender">Gender</option>
@@ -84,7 +111,7 @@ export default function Search(props) {
               <button type="submit" className="btn btn-light w-50">
                 Search
               </button>
-              <p>No records to display</p>
+              {btnHelperText()}
             </form>
           </div>
         </div>
@@ -153,7 +180,6 @@ export default function Search(props) {
                 </tr>
               </thead>
               <tbody>
-                {console.log(props.searchResultState)}
                 {props.searchResultState.map((result) => {
                   return (
                     <tr key={result["User ID"]}>
