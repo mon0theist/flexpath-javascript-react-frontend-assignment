@@ -2,21 +2,13 @@ import { React, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 {
-  /* If you are on the Search page and have executed a search that returns results, those should not disappear if you navigate to the "Home" page and then back to the "Search" page. It is fine if the dropdown option and text search field are reset, but the results should NOT be reset from jumping between routes in the app.
-    
-    ie this will need State
-    
-    */
-}
+  /* If you are on the Search page and have executed a search that returns results, those should not disappear if you navigate to the "Home" page and then back to the "Search" page. It is fine if the dropdown option and text search field are reset, but the results should NOT be reset from jumping between routes in the app.*/}
 
 // const data = await fetch(`/api/data/search`)
 // returns array of objects
-
 // This route takes 2 optional query parameters:
 // filterType
 // keyword
-
-// The keyword is whatever a user types in the search bar before hitting the Search button. The filterType is whichever field in the dataset they choose to run this keyword search against.
 
 // Valid values for the filterType are:
 // const filterTypeOptions = ["gender", "operatingSystem", "model", "behaviorclass"]
@@ -24,28 +16,24 @@ import { useSearchParams } from "react-router-dom";
 // const data = await fetch(`/api/data/search`)
 // This route takes 2 optional query parameters:
 
-// filterType
-// keyword
+// pseudocode
+// User selects a filter from the dropdown => filterState is set (controlled component)
+// User optionally enters a keyword => keyword state is set (controlled component)
+// form is submitted
+//    update URL params
+//    run actual search with fetch and URL params
+//    ...what is the actual purpose of affecting URL params at all then?
 
-// Filter types:
-// const filterTypeOptions = ["gender", "operatingSystem", "model", "behaviorclass"]
-
-// searchquery would be something like ?keyword=searchterm&filterType=option
 
 export default function Search() {
-  const [datapointState, setDatapointState] = useState("model");
+  const [filterState, setfilterState] = useState("");
   const [keywordState, setKeywordState] = useState("");
   const [searchResultState, setSearchResultState] = useState([]);
-  const [searchParams, setSearchParams] = useSearchParams();
 
   async function performSearch(event) {
     event.preventDefault();
-    setSearchParams({
-      filterType: datapointState,
-      keyword: keywordState,
-    });
     const response = await fetch(
-      `/api/data/search/?filterType=${searchParams.filterType}&keyword=${searchParams.keyword}`,
+      `/api/data/search/?filterType=${filterState}&keyword=${keywordState}`,
     );
     const searchResult = await response.json(); // array of objects, need to array.map() to display them
     setSearchResultState(searchResult);
@@ -63,18 +51,19 @@ export default function Search() {
               }}
             >
               <div className="mb-1">
-                <label htmlFor="datapoint" className="form-label">
+                <label htmlFor="filterType" className="form-label">
                   Select data point to filter search by:
                 </label>
               </div>
               <div className="mb-4">
                 <select
-                  name="datapoint"
-                  id="datapoint"
-                  value={datapointState}
+                  name="filterType"
+                  id="filterType"
+                  value={filterState}
                   className="w-25"
-                  onChange={(event) => setDatapointState(event.target.value)}
+                  onChange={(event) => setfilterState(event.target.value)}
                 >
+                  <option value="" disabled selected hidden>Select Filter...</option>
                   <option value="model">Model</option>
                   <option value="operatingSystem">Operating System</option>
                   <option value="gender">Gender</option>
@@ -164,15 +153,16 @@ export default function Search() {
                 </tr>
               </thead>
               <tbody>
+                {console.log(searchResultState)}
                 {searchResultState.map((result) => {
                   return (
                     <tr key={result["User ID"]}>
                       <td>{result["User ID"]}</td>
                       <td>{result["Device Model"]}</td>
-                      <td>{result["Ooperating System"]}</td>
-                      <td>{result["App Usage Time (min/day"]}</td>
+                      <td>{result["Operating System"]}</td>
+                      <td>{result["App Usage Time (min/day)"]}</td>
                       <td>{result["Screen On Time (hours/day)"]}</td>
-                      <td>{result["Battery Drain (mAH/day)"]}</td>
+                      <td>{result["Battery Drain (mAh/day)"]}</td>
                       <td>{result["Number of Apps Installed"]}</td>
                       <td>{result["Data Usage (MB/day)"]}</td>
                       <td>{result["Age"]}</td>
