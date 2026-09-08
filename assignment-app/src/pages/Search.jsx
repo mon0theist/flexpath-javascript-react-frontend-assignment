@@ -1,5 +1,4 @@
 import { React, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 
 {
   /* If you are on the Search page and have executed a search that returns results, those should not disappear if you navigate to the "Home" page and then back to the "Search" page. It is fine if the dropdown option and text search field are reset, but the results should NOT be reset from jumping between routes in the app.*/}
@@ -24,11 +23,12 @@ import { useSearchParams } from "react-router-dom";
 //    run actual search with fetch and URL params
 //    ...what is the actual purpose of affecting URL params at all then?
 
+// lifting state to App so that search results can persist
 
-export default function Search() {
+export default function Search(props) {
   const [filterState, setfilterState] = useState("");
   const [keywordState, setKeywordState] = useState("");
-  const [searchResultState, setSearchResultState] = useState([]);
+  // const [searchResultState, setSearchResultState] = useState([]); - lifted to App.jsx for persistence
 
   async function performSearch(event) {
     event.preventDefault();
@@ -36,8 +36,8 @@ export default function Search() {
       `/api/data/search/?filterType=${filterState}&keyword=${keywordState}`,
     );
     const searchResult = await response.json(); // array of objects, need to array.map() to display them
-    setSearchResultState(searchResult);
-    console.log(searchResultState);
+    props.setSearchResultState(searchResult);
+    // console.log(searchResultState);
   }
 
   return (
@@ -153,8 +153,8 @@ export default function Search() {
                 </tr>
               </thead>
               <tbody>
-                {console.log(searchResultState)}
-                {searchResultState.map((result) => {
+                {console.log(props.searchResultState)}
+                {props.searchResultState.map((result) => {
                   return (
                     <tr key={result["User ID"]}>
                       <td>{result["User ID"]}</td>
