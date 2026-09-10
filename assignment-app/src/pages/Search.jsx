@@ -31,7 +31,7 @@ export default function Search(props) {
   const [keywordState, setKeywordState] = useState("");
   const [loadingState, setLoadingState] = useState(false);
   const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
-  
+
   const numResults = props.searchResultState.length;
 
   async function performSearch(event) {
@@ -44,25 +44,40 @@ export default function Search(props) {
     const searchResult = await response.json(); // array of objects, need to array.map() to display them
     props.setSearchResultState(searchResult);
     setLoadingState(false);
+    console.log(searchResult);
+    appUsageTime(searchResult);
+    // using searchResult instead of props.searchResultState, because props.searchResultState doesn't actually update until next render
+    // whereas searchResult is already the "current/updated" value
+  }
+
+  function appUsageTime(searchResult) {
+    let accumulator = 0;
+    let counter = 0;
+    searchResult.forEach((result) => {
+      accumulator = accumulator + Number(result["App Usage Time (min/day)"]);
+      counter++;
+    });
+    const average = Math.floor(accumulator / counter);
+    console.log("Accumulator: " + accumulator);
+    console.log("Counter: " + counter);
+    console.log("Average: " + average);
+    return average;
   }
 
   function btnHelperText() {
     let text = "";
-    
+
     if (loadingState) {
       text = "Loading...";
-    }
-    else if (loadingState === false && isFirstPageLoad === true){
+    } else if (loadingState === false && isFirstPageLoad === true) {
       text = "";
-    } 
-    else if (loadingState === false && numResults < 1) {
-      text = "No results found"
-    }
-    else if (loadingState === false && numResults > 0){
+    } else if (loadingState === false && numResults < 1) {
+      text = "No results found";
+    } else if (loadingState === false && numResults > 0) {
       text = `Displaying ${numResults} records`;
     }
 
-    return (<p>{text}</p>)
+    return <p>{text}</p>;
   }
 
   return (
@@ -120,10 +135,8 @@ export default function Search(props) {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">App Usage Time (min/day)</h5>
-                <p className="card-text">
-                  Some quick example text to build on the card title and make up
-                  the bulk of the card’s content.
-                </p>
+                <p className="card-text">Average - { Number.isNaN(appUsageTime(props.searchResultState)) ? 0 : appUsageTime(props.searchResultState)} Minutes</p>
+                <p className="card-text">Median - 0 Minutes</p>
               </div>
             </div>
           </div>
@@ -131,10 +144,8 @@ export default function Search(props) {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Screen On Time (hours/day)</h5>
-                <p className="card-text">
-                  Some quick example text to build on the card title and make up
-                  the bulk of the card’s content.
-                </p>
+                <p className="card-text">Average - 0 Hours</p>
+                <p className="card-text">Median - 0 Hours</p>
               </div>
             </div>
           </div>
@@ -142,10 +153,8 @@ export default function Search(props) {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Number of Apps Installed</h5>
-                <p className="card-text">
-                  Some quick example text to build on the card title and make up
-                  the bulk of the card’s content.
-                </p>
+                <p className="card-text">Average - 0 Apps</p>
+                <p className="card-text">Median - 0 Apps</p>
               </div>
             </div>
           </div>
@@ -153,10 +162,8 @@ export default function Search(props) {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Age</h5>
-                <p className="card-text">
-                  Some quick example text to build on the card title and make up
-                  the bulk of the card’s content.
-                </p>
+                <p className="card-text">Average - 0 Years Old</p>
+                <p className="card-text">Median - 0 Years Old</p>
               </div>
             </div>
           </div>
