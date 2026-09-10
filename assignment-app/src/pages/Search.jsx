@@ -64,6 +64,22 @@ export default function Search(props) {
     return average;
   }
 
+  function getMedian(array) {
+    // sort array
+    const sortedArray = [...array]
+    sortedArray.sort(function (a, b) {
+      return a - b;
+    });
+    // determine even or odd array.length
+    if (sortedArray.legnth % 2 === 0){
+      // even
+    }
+    else if (sortedArray.length % 2 === 1){
+      // odd
+      return 
+    }
+  }
+
   function btnHelperText() {
     let text = "";
 
@@ -135,7 +151,13 @@ export default function Search(props) {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">App Usage Time (min/day)</h5>
-                <p className="card-text">Average - { Number.isNaN(appUsageTime(props.searchResultState)) ? 0 : appUsageTime(props.searchResultState)} Minutes</p>
+                <p className="card-text">
+                  Average -{" "}
+                  {Number.isNaN(appUsageTime(props.searchResultState))
+                    ? 0
+                    : appUsageTime(props.searchResultState)}{" "}
+                  Minutes
+                </p>
                 <p className="card-text">Median - 0 Minutes</p>
               </div>
             </div>
