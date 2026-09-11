@@ -31,6 +31,7 @@ export default function Search(props) {
   const [keywordState, setKeywordState] = useState("");
   const [loadingState, setLoadingState] = useState(false);
   const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
+  const [errorState, setErrorState] = useState(false);
 
   const numResults = props.searchResultState.length;
 
@@ -38,10 +39,16 @@ export default function Search(props) {
     event.preventDefault();
     setLoadingState(true);
     setIsFirstPageLoad(false);
-    const response = await fetch(
-      `/api/data/search/?filterType=${filterState}&keyword=${keywordState}`,
-    );
-    const searchResult = await response.json(); // array of objects, need to array.map() to display them
+    try {
+      const response = await fetch(
+        `/api/data/search/?filterType=${filterState}&keyword=${keywordState}`
+        const searchResult = await response.json(); // array of objects, need to array.map() to display them
+      );
+      
+    } catch (error) {
+      setErrorState(true);
+      throw "Failed to connect to API";
+    }
     props.setSearchResultState(searchResult);
     setLoadingState(false);
     console.log(searchResult);
@@ -66,21 +73,19 @@ export default function Search(props) {
     let accumulator = 0;
     let counter = 0;
     // have to account for empty search results
-    if (colData.length === 0){
-      return 0
-    }
-    else {
+    if (colData.length === 0) {
+      return 0;
+    } else {
       colData.forEach((result) => {
-      accumulator = accumulator + Number(result);
-      counter++;
-    });
-    const average = Math.floor(accumulator / counter);
-    // console.log("Accumulator: " + accumulator);
-    // console.log("Counter: " + counter);
-    // console.log("Average: " + average);
-    return average;
+        accumulator = accumulator + Number(result);
+        counter++;
+      });
+      const average = Math.floor(accumulator / counter);
+      // console.log("Accumulator: " + accumulator);
+      // console.log("Counter: " + counter);
+      // console.log("Average: " + average);
+      return average;
     }
-    
   }
 
   function getMedian(colData) {
@@ -128,34 +133,71 @@ export default function Search(props) {
     return <p>{text}</p>;
   }
 
-  function loadTable(){
+  function loadTable() {
     return (
       <>
-      {props.searchResultState.map((result) => {
-                  return (
-                    <tr key={result["User ID"]}>
-                      <td>{Number(result["User ID"])}</td>
-                      <td>{result["Device Model"]}</td>
-                      <td>{result["Operating System"]}</td>
-                      <td>{Number(result["App Usage Time (min/day)"]).toLocaleString("en-US")}</td>
-                      <td>{Number(result["Screen On Time (hours/day)"]).toLocaleString("en-US")}</td>
-                      <td>{Number(result["Battery Drain (mAh/day)"]).toLocaleString("en-US")}</td>
-                      <td>{Number(result["Number of Apps Installed"]).toLocaleString("en-US")}</td>
-                      <td>{Number(result["Data Usage (MB/day)"]).toLocaleString("en-US")}</td>
-                      <td>{Number(result["Age"])}</td>
-                      <td>{result["Gender"]}</td>
-                      <td>{result["User Behavior Class"]}</td>
-                    </tr>
-                  );
-                })}
+        {props.searchResultState.map((result) => {
+          return (
+            <tr key={result["User ID"]}>
+              <td>{Number(result["User ID"])}</td>
+              <td>{result["Device Model"]}</td>
+              <td>{result["Operating System"]}</td>
+              <td>
+                {Number(result["App Usage Time (min/day)"]).toLocaleString(
+                  "en-US",
+                )}
+              </td>
+              <td>
+                {Number(result["Screen On Time (hours/day)"]).toLocaleString(
+                  "en-US",
+                )}
+              </td>
+              <td>
+                {Number(result["Battery Drain (mAh/day)"]).toLocaleString(
+                  "en-US",
+                )}
+              </td>
+              <td>
+                {Number(result["Number of Apps Installed"]).toLocaleString(
+                  "en-US",
+                )}
+              </td>
+              <td>
+                {Number(result["Data Usage (MB/day)"]).toLocaleString("en-US")}
+              </td>
+              <td>{Number(result["Age"])}</td>
+              <td>{result["Gender"]}</td>
+              <td>{result["User Behavior Class"]}</td>
+            </tr>
+          );
+        })}
       </>
-    )
-  };
+    );
+  }
+
+  function showError() {
+    return (
+      <div class="d-grid gap-2">
+        <button type="button" class="btn btn-outline-danger" disabled>
+          Error Connecting to API - Please try again later 
+        </button>
+      </div>
+    );
+  }
 
   // extract column data
-  const appUsageTime = extractColumn(props.searchResultState, "App Usage Time (min/day)");
-  const screenOnTime = extractColumn(props.searchResultState, "Screen On Time (hours/day)");
-  const numApps = extractColumn(props.searchResultState, "Number of Apps Installed");
+  const appUsageTime = extractColumn(
+    props.searchResultState,
+    "App Usage Time (min/day)",
+  );
+  const screenOnTime = extractColumn(
+    props.searchResultState,
+    "Screen On Time (hours/day)",
+  );
+  const numApps = extractColumn(
+    props.searchResultState,
+    "Number of Apps Installed",
+  );
   const age = extractColumn(props.searchResultState, "Age");
 
   // calculate avg
@@ -168,7 +210,7 @@ export default function Search(props) {
   const medAppUsage = getMedian(appUsageTime);
   const medScreenTime = getMedian(screenOnTime);
   const medNumApps = getMedian(numApps);
-  const medAge = getMedian(age)
+  const medAge = getMedian(age);
 
   return (
     <>
@@ -220,17 +262,16 @@ export default function Search(props) {
             </form>
           </div>
         </div>
+        {errorState ? showError() : ""}
         <div className="row mt-4">
           <div className="col-3">
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">App Usage Time (min/day)</h5>
+                <p className="card-text">Average - {avgAppUsage} Minutes</p>
                 <p className="card-text">
-                  Average -{" "}
-                  {avgAppUsage}{" "}
-                  Minutes
+                  Median - {Number(medAppUsage).toLocaleString("en-US")} Minutes
                 </p>
-                <p className="card-text">Median - {medAppUsage.toLocaleString("en-US")} Minutes</p>
               </div>
             </div>
           </div>
@@ -238,8 +279,13 @@ export default function Search(props) {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Screen On Time (hours/day)</h5>
-                <p className="card-text">Average - {avgScreenTime.toLocaleString("en-US")} Hours</p>
-                <p className="card-text">Median - {medScreenTime.toLocaleString("en-US")} Hours</p>
+                <p className="card-text">
+                  Average - {Number(avgScreenTime).toLocaleString("en-US")}{" "}
+                  Hours
+                </p>
+                <p className="card-text">
+                  Median - {Number(medScreenTime).toLocaleString("en-US")} Hours
+                </p>
               </div>
             </div>
           </div>
@@ -247,8 +293,12 @@ export default function Search(props) {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Number of Apps Installed</h5>
-                <p className="card-text">Average - {avgNumApps.toLocaleString("en-US")} Apps</p>
-                <p className="card-text">Median - {medNumApps.toLocaleString("en-US")} Apps</p>
+                <p className="card-text">
+                  Average - {Number(avgNumApps).toLocaleString("en-US")} Apps
+                </p>
+                <p className="card-text">
+                  Median - {Number(medNumApps).toLocaleString("en-US")} Apps
+                </p>
               </div>
             </div>
           </div>
@@ -256,8 +306,12 @@ export default function Search(props) {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Age</h5>
-                <p className="card-text">Average - {avgAge.toLocaleString("en-US")} Years Old</p>
-                <p className="card-text">Median - {medAge.toLocaleString("en-US")} Years Old</p>
+                <p className="card-text">
+                  Average - {Number(avgAge).toLocaleString("en-US")} Years Old
+                </p>
+                <p className="card-text">
+                  Median - {Number(medAge).toLocaleString("en-US")} Years Old
+                </p>
               </div>
             </div>
           </div>
