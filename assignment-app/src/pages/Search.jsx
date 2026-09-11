@@ -128,6 +128,30 @@ export default function Search(props) {
     return <p>{text}</p>;
   }
 
+  function loadTable(){
+    return (
+      <>
+      {props.searchResultState.map((result) => {
+                  return (
+                    <tr key={result["User ID"]}>
+                      <td>{Number(result["User ID"])}</td>
+                      <td>{result["Device Model"]}</td>
+                      <td>{result["Operating System"]}</td>
+                      <td>{Number(result["App Usage Time (min/day)"]).toLocaleString("en-US")}</td>
+                      <td>{Number(result["Screen On Time (hours/day)"]).toLocaleString("en-US")}</td>
+                      <td>{Number(result["Battery Drain (mAh/day)"]).toLocaleString("en-US")}</td>
+                      <td>{Number(result["Number of Apps Installed"]).toLocaleString("en-US")}</td>
+                      <td>{Number(result["Data Usage (MB/day)"]).toLocaleString("en-US")}</td>
+                      <td>{Number(result["Age"])}</td>
+                      <td>{result["Gender"]}</td>
+                      <td>{result["User Behavior Class"]}</td>
+                    </tr>
+                  );
+                })}
+      </>
+    )
+  };
+
   // extract column data
   const appUsageTime = extractColumn(props.searchResultState, "App Usage Time (min/day)");
   const screenOnTime = extractColumn(props.searchResultState, "Screen On Time (hours/day)");
@@ -257,7 +281,7 @@ export default function Search(props) {
                 </tr>
               </thead>
               <tbody>
-                {props.searchResultState.map((result) => {
+                {/* {props.searchResultState.map((result) => {
                   return (
                     <tr key={result["User ID"]}>
                       <td>{Number(result["User ID"])}</td>
@@ -273,7 +297,8 @@ export default function Search(props) {
                       <td>{result["User Behavior Class"]}</td>
                     </tr>
                   );
-                })}
+                })} */}
+                {loadingState ? <p>Loading...</p> : loadTable()}
               </tbody>
             </table>
           </div>
