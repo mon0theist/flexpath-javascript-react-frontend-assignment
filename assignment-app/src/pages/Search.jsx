@@ -45,38 +45,70 @@ export default function Search(props) {
     props.setSearchResultState(searchResult);
     setLoadingState(false);
     console.log(searchResult);
-    appUsageTime(searchResult);
+    // appUsageTime(searchResult);
     // using searchResult instead of props.searchResultState, because props.searchResultState doesn't actually update until next render
     // whereas searchResult is already the "current/updated" value
+    // getMedian(searchResult);
   }
 
-  function appUsageTime(searchResult) {
+  // need to extract data from specific columns to calculate stats cards,
+  // otherwise I'd have to write 8 separate redundant functions
+  function extractColumn(searchResult, colName) {
+    // might need to account for empty search results
+    let colData = [];
+    searchResult.forEach((result) => {
+      colData.push(Number(result[colName]));
+    });
+    return colData;
+  }
+
+  function getAverage(colData) {
     let accumulator = 0;
     let counter = 0;
-    searchResult.forEach((result) => {
-      accumulator = accumulator + Number(result["App Usage Time (min/day)"]);
+    // have to account for empty search results
+    if (colData.length === 0){
+      return 0
+    }
+    else {
+      colData.forEach((result) => {
+      accumulator = accumulator + Number(result);
       counter++;
     });
     const average = Math.floor(accumulator / counter);
-    console.log("Accumulator: " + accumulator);
-    console.log("Counter: " + counter);
-    console.log("Average: " + average);
+    // console.log("Accumulator: " + accumulator);
+    // console.log("Counter: " + counter);
+    // console.log("Average: " + average);
     return average;
+    }
+    
   }
 
-  function getMedian(array) {
+  function getMedian(colData) {
+    // https://www.geeksforgeeks.org/javascript/how-to-get-median-of-an-array-of-numbers-in-javascript/
     // sort array
-    const sortedArray = [...array]
+    const sortedArray = [...colData];
     sortedArray.sort(function (a, b) {
       return a - b;
     });
     // determine even or odd array.length
-    if (sortedArray.legnth % 2 === 0){
+    // also need to make sure the array is not empty (ie no search results)
+    if (sortedArray.length === 0) {
+      return 0;
+    } else if (sortedArray.length % 2 === 0) {
       // even
-    }
-    else if (sortedArray.length % 2 === 1){
+      // average of the two middle indices
+      // "For any even-length array, the two middle indices are always length/2 and (length/2) - 1"
+      // ^ because of zero-indexing
+      const avg =
+        (sortedArray[sortedArray.length / 2] +
+          sortedArray[sortedArray.length / 2 - 1]) /
+        2;
+      return avg;
+    } else if (sortedArray.length % 2 === 1) {
       // odd
-      return 
+      // dividing in half will likely have a remainder/decimal,
+      // so math.floor will round down to the nearest whole number
+      return sortedArray[Math.floor(sortedArray.length / 2)];
     }
   }
 
@@ -95,6 +127,24 @@ export default function Search(props) {
 
     return <p>{text}</p>;
   }
+
+  // extract column data
+  const appUsageTime = extractColumn(props.searchResultState, "App Usage Time (min/day)");
+  const screenOnTime = extractColumn(props.searchResultState, "Screen On Time (hours/day)");
+  const numApps = extractColumn(props.searchResultState, "Number of Apps Installed");
+  const age = extractColumn(props.searchResultState, "Age");
+
+  // calculate avg
+  const avgAppUsage = getAverage(appUsageTime);
+  const avgScreenTime = getAverage(screenOnTime);
+  const avgNumApps = getAverage(numApps);
+  const avgAge = getAverage(age);
+
+  // calculate median
+  const medAppUsage = getMedian(appUsageTime);
+  const medScreenTime = getMedian(screenOnTime);
+  const medNumApps = getMedian(numApps);
+  const medAge = getMedian(age)
 
   return (
     <>
@@ -153,12 +203,10 @@ export default function Search(props) {
                 <h5 className="card-title">App Usage Time (min/day)</h5>
                 <p className="card-text">
                   Average -{" "}
-                  {Number.isNaN(appUsageTime(props.searchResultState))
-                    ? 0
-                    : appUsageTime(props.searchResultState)}{" "}
+                  {avgAppUsage}{" "}
                   Minutes
                 </p>
-                <p className="card-text">Median - 0 Minutes</p>
+                <p className="card-text">Median - {medAppUsage.toLocaleString("en-US")} Minutes</p>
               </div>
             </div>
           </div>
@@ -166,8 +214,8 @@ export default function Search(props) {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Screen On Time (hours/day)</h5>
-                <p className="card-text">Average - 0 Hours</p>
-                <p className="card-text">Median - 0 Hours</p>
+                <p className="card-text">Average - {avgScreenTime.toLocaleString("en-US")} Hours</p>
+                <p className="card-text">Median - {medScreenTime.toLocaleString("en-US")} Hours</p>
               </div>
             </div>
           </div>
@@ -175,8 +223,8 @@ export default function Search(props) {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Number of Apps Installed</h5>
-                <p className="card-text">Average - 0 Apps</p>
-                <p className="card-text">Median - 0 Apps</p>
+                <p className="card-text">Average - {avgNumApps.toLocaleString("en-US")} Apps</p>
+                <p className="card-text">Median - {medNumApps.toLocaleString("en-US")} Apps</p>
               </div>
             </div>
           </div>
@@ -184,8 +232,8 @@ export default function Search(props) {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Age</h5>
-                <p className="card-text">Average - 0 Years Old</p>
-                <p className="card-text">Median - 0 Years Old</p>
+                <p className="card-text">Average - {avgAge.toLocaleString("en-US")} Years Old</p>
+                <p className="card-text">Median - {medAge.toLocaleString("en-US")} Years Old</p>
               </div>
             </div>
           </div>
@@ -212,15 +260,15 @@ export default function Search(props) {
                 {props.searchResultState.map((result) => {
                   return (
                     <tr key={result["User ID"]}>
-                      <td>{result["User ID"]}</td>
+                      <td>{Number(result["User ID"])}</td>
                       <td>{result["Device Model"]}</td>
                       <td>{result["Operating System"]}</td>
-                      <td>{result["App Usage Time (min/day)"]}</td>
-                      <td>{result["Screen On Time (hours/day)"]}</td>
-                      <td>{result["Battery Drain (mAh/day)"]}</td>
-                      <td>{result["Number of Apps Installed"]}</td>
-                      <td>{result["Data Usage (MB/day)"]}</td>
-                      <td>{result["Age"]}</td>
+                      <td>{Number(result["App Usage Time (min/day)"]).toLocaleString("en-US")}</td>
+                      <td>{Number(result["Screen On Time (hours/day)"]).toLocaleString("en-US")}</td>
+                      <td>{Number(result["Battery Drain (mAh/day)"]).toLocaleString("en-US")}</td>
+                      <td>{Number(result["Number of Apps Installed"]).toLocaleString("en-US")}</td>
+                      <td>{Number(result["Data Usage (MB/day)"]).toLocaleString("en-US")}</td>
+                      <td>{Number(result["Age"])}</td>
                       <td>{result["Gender"]}</td>
                       <td>{result["User Behavior Class"]}</td>
                     </tr>
