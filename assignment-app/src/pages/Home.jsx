@@ -38,7 +38,7 @@ export default function Home() {
             </li>
           </ul>
           <p>
-            <a href="https://www.kaggle.com/datasets/valakhorasani/mobile-device-usage-and-user-behavior-dataset?resource=download">
+            <a href="https://www.kaggle.com/datasets/valakhorasani/mobile-device-usage-and-user-behavior-dataset?resource=download" target="_blank">
               Sourced from this Kaggle Dataset
             </a>
           </p>

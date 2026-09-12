@@ -32,6 +32,7 @@ export default function Search(props) {
   const [loadingState, setLoadingState] = useState(false);
   const [isFirstPageLoad, setIsFirstPageLoad] = useState(true);
   const [errorState, setErrorState] = useState(false);
+  const [errorCodeState, setErrorCodeState ] = useState("");
 
   const numResults = props.searchResultState.length;
 
@@ -39,24 +40,22 @@ export default function Search(props) {
     event.preventDefault();
     setLoadingState(true);
     setIsFirstPageLoad(false);
+    setErrorState(false);
+
     try {
-      const response = await fetch(
-        `/api/data/search/?filterType=${filterState}&keyword=${keywordState}`
-        const searchResult = await response.json(); // array of objects, need to array.map() to display them
-      );
-      
-    } catch (error) {
-      setErrorState(true);
-      throw "Failed to connect to API";
+      const response = await fetch(`/api/data/search/?filterType=${filterState}&keyword=${keywordState}`);
+      const searchResult = await response.json(); // array of objects, need to array.map() to display them
+      props.setSearchResultState(searchResult);
+      // console.log(searchResult);
     }
-    props.setSearchResultState(searchResult);
-    setLoadingState(false);
-    console.log(searchResult);
-    // appUsageTime(searchResult);
-    // using searchResult instead of props.searchResultState, because props.searchResultState doesn't actually update until next render
-    // whereas searchResult is already the "current/updated" value
-    // getMedian(searchResult);
-  }
+    catch (error){
+      setErrorState(true);
+      setErrorCodeState(error.message)
+    }
+    finally {
+      setLoadingState(false);
+    }
+  };
 
   // need to extract data from specific columns to calculate stats cards,
   // otherwise I'd have to write 8 separate redundant functions
@@ -125,9 +124,9 @@ export default function Search(props) {
     } else if (loadingState === false && isFirstPageLoad === true) {
       text = "";
     } else if (loadingState === false && numResults < 1) {
-      text = "No results found";
+      text = "No Records to Display";
     } else if (loadingState === false && numResults > 0) {
-      text = `Displaying ${numResults} records`;
+      text = `Displaying ${numResults} Records`;
     }
 
     return <p>{text}</p>;
@@ -175,11 +174,11 @@ export default function Search(props) {
     );
   }
 
-  function showError() {
+  function showError(err) {
     return (
-      <div class="d-grid gap-2">
-        <button type="button" class="btn btn-outline-danger" disabled>
-          Error Connecting to API - Please try again later 
+      <div className="d-grid gap-2">
+        <button type="button" className="btn btn-outline-danger" disabled>
+          ⚠️ <strong>ERROR</strong>: {"{"}{err}{"}"} - Please try again later
         </button>
       </div>
     );
@@ -235,7 +234,7 @@ export default function Search(props) {
                   className="w-25"
                   onChange={(event) => setfilterState(event.target.value)}
                 >
-                  <option value="" disabled selected hidden>
+                  <option value="" disabled hidden>
                     Select Filter...
                   </option>
                   <option value="model">Model</option>
@@ -262,7 +261,7 @@ export default function Search(props) {
             </form>
           </div>
         </div>
-        {errorState ? showError() : ""}
+        {errorState ? showError(errorCodeState) : ""}
         <div className="row mt-4">
           <div className="col-3">
             <div className="card">
@@ -335,24 +334,7 @@ export default function Search(props) {
                 </tr>
               </thead>
               <tbody>
-                {/* {props.searchResultState.map((result) => {
-                  return (
-                    <tr key={result["User ID"]}>
-                      <td>{Number(result["User ID"])}</td>
-                      <td>{result["Device Model"]}</td>
-                      <td>{result["Operating System"]}</td>
-                      <td>{Number(result["App Usage Time (min/day)"]).toLocaleString("en-US")}</td>
-                      <td>{Number(result["Screen On Time (hours/day)"]).toLocaleString("en-US")}</td>
-                      <td>{Number(result["Battery Drain (mAh/day)"]).toLocaleString("en-US")}</td>
-                      <td>{Number(result["Number of Apps Installed"]).toLocaleString("en-US")}</td>
-                      <td>{Number(result["Data Usage (MB/day)"]).toLocaleString("en-US")}</td>
-                      <td>{Number(result["Age"])}</td>
-                      <td>{result["Gender"]}</td>
-                      <td>{result["User Behavior Class"]}</td>
-                    </tr>
-                  );
-                })} */}
-                {loadingState ? <p>Loading...</p> : loadTable()}
+                {loadingState ? <tr><td>Loading Records...</td></tr> : loadTable()}
               </tbody>
             </table>
           </div>
